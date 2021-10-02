@@ -10,29 +10,34 @@
 // Define DISCONNECT Method
 import java.io.* ;
 import java.net.* ;
-import java.util.* ;
 
 public final class Server {
-    ServerSocket serverSocket;
-    ArrayList<ServerConnection> connections = new ArrayList<ServerConnection>();
-    boolean shouldRun = true;
+    public static void main(String[] args) throws Exception {
 
-    public static void main(String[] args) {
-        new Server();
-    }
+        ServerSocket serverSocket = null;
+        boolean shouldRun = true;
 
-    public Server() {
         try {
-            serverSocket = new ServerSocket(3333);
-            while (shouldRun) {
-                Socket socket = serverSocket.accept();
-                ServerConnection serverConnection = new ServerConnection(socket, this);
-                serverConnection.start();
-                connections.add(serverConnection);
-            }
-
+            serverSocket = new ServerSocket(5555);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Could not listen on port: 5555.");
+            System.exit(1);
+        }
+
+        // Process HTTP service requests in an infinite loop.
+        while (shouldRun) {
+            // Listen for a TCP connection request.
+            Socket connection = serverSocket.accept();
+
+            // Construct an object to process the HTTP request message.
+            Request request = new Request(connection);
+
+            shouldRun = request.getShouldRun();
+            // Create a new thread to process the request.
+            Thread thread = new Thread(request);
+
+            // Start the thread.
+            thread.start();
         }
     }
 }

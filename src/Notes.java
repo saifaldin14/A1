@@ -7,16 +7,21 @@ public class Notes {
     ArrayList<String> colors = new ArrayList<String>();
     ArrayList<Note> notes = new ArrayList<Note>();
 
-    public Notes(int w, int h, ArrayList<String> clrs) {
-        width = w;
-        height = h;
-        colors = clrs;
+    public Notes() {
+        this.width = 0;
+        this.height = 0;
     }
 
-    public ArrayList<Note> getRegular (String color, int[] coordinates, String refersTo) {
+    public Notes(int w, int h, ArrayList<String> clrs) {
+        this.width = w;
+        this.height = h;
+        this.colors = clrs;
+    }
+
+    public ArrayList<Note> getRegular (String color, ArrayList<Integer> coordinates, String refersTo) {
         ArrayList<Note> returnNotes = new ArrayList<Note>();
         boolean isColor = !color.isEmpty(); // Will be true is color is not empty and false if it is empty
-        boolean isCoord = true ? coordinates.length > 0 : false; // Will be true is there are coordinates and false if there aren;t
+        boolean isCoord = true ? coordinates.size() > 0 : false; // Will be true is there are coordinates and false if there aren;t
         boolean isRefer = !refersTo.isEmpty(); // Will be true if there is a string and false if there isn't
 
         for (Note note : notes) {

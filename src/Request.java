@@ -174,19 +174,41 @@ public class Request implements Runnable {
     }
 
     private void processPostRequest(String[] splitStr) {
+        // Requirements: POST x y width height message
+        if (splitStr.length < 7) {
+            processInvalidRequest();
+            return;
+        }
 
+        try {
+            int x = Integer.parseInt(splitStr[1]);
+            int y = Integer.parseInt(splitStr[2]);
+            int width = Integer.parseInt(splitStr[3]);
+            int height = Integer.parseInt(splitStr[4]);
+            String color = splitStr[5];
+
+            String message = "";
+
+            for (int i = 6; i < splitStr.length; i++) {
+                message += splitStr[i] + " ";
+            }
+
+            notes.post(x, y, width, height, color, message);
+        } catch (NumberFormatException e) {
+            processInvalidRequest();
+            return;
+        }
     }
 
     private void processClearRequest() {
-
+        notes.clear();
     }
 
     private void processShakeRequest() {
-
+        notes.shake();
     }
 
     private void processPinRequest() {
-
     }
 
     private void processUnpinRequest() {

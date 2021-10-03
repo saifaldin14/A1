@@ -5,7 +5,7 @@ public class Notes {
     private int width;
     private int height;
     ArrayList<String> colors = new ArrayList<String>();
-    ArrayList<Note> notes = new ArrayList<Note>();
+    HashMap<Integer, Note> notes = new HashMap<Integer, Note>();
 
     public Notes() {
         this.width = 0;
@@ -18,13 +18,17 @@ public class Notes {
         this.colors = clrs;
     }
 
+    public Note getNote(int id) {
+        return notes.get(id);
+    }
+
     public ArrayList<Note> getRegular (String color, ArrayList<Integer> coordinates, String refersTo) {
         ArrayList<Note> returnNotes = new ArrayList<Note>();
         boolean isColor = !color.isEmpty(); // Will be true is color is not empty and false if it is empty
         boolean isCoord = true ? coordinates.size() > 0 : false; // Will be true is there are coordinates and false if there aren;t
         boolean isRefer = !refersTo.isEmpty(); // Will be true if there is a string and false if there isn't
 
-        for (Note note : notes) {
+        for (Note note : notes.values()) {
             //Check if color exists and make sure it's a valid color and get notes with that color
             boolean shouldColor = true ? !isColor : false;
             boolean shouldCoord = true ? !isCoord : false;
@@ -49,7 +53,7 @@ public class Notes {
     public ArrayList<Note> getPin() {
         ArrayList<Note> returnNotes = new ArrayList<Note>();
 
-        for (Note note : notes) {
+        for (Note note : notes.values()) {
             if (note.getPinStatus())
                 returnNotes.add(note);
         }
@@ -57,9 +61,10 @@ public class Notes {
     }
 
     public synchronized void post(int x, int y, int width, int height, String color, String msg) {
+        int id = notes.size() + 1;
         if (checkColors(color) && checkCoordinates(x, y) && checkDimensions(width, height)) {
             Note note = new Note(x, y, width, height, color, msg);
-            notes.add(note);
+            notes.put(id, note);
         }
     }
 

@@ -60,10 +60,10 @@ public class Request implements Runnable {
                 processShakeRequest();
                 break;
             case "PIN":
-                processPinRequest();
+                processPinRequest(splitStr);
                 break;
             case "UNPIN":
-                processUnpinRequest();
+                processUnpinRequest(splitStr);
                 break;
             case "DISCONNECT":
                 processDisconnectRequest();
@@ -230,10 +230,28 @@ public class Request implements Runnable {
         notes.shake();
     }
 
-    private void processPinRequest() {
+    private void processPinRequest(String[] splitStr) {
+        int id = 0;
+        try {
+            id = Integer.parseInt(splitStr[1]);
+        } catch (NumberFormatException e) {
+            processInvalidRequest();
+            return;
+        }
+
+        notes.getNote(id).pinValue();
     }
 
-    private void processUnpinRequest() {
+    private void processUnpinRequest(String[] splitStr) {
+        int id = 0;
+        try {
+            id = Integer.parseInt(splitStr[1]);
+        } catch (NumberFormatException e) {
+            processInvalidRequest();
+            return;
+        }
+
+        notes.getNote(id).unpinValue();
     }
 
     private void processDisconnectRequest() {

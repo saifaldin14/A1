@@ -234,5 +234,6 @@ public class Request implements Runnable {
     }
 
     private void processInvalidRequest() {
+        statusCode = "ERROR";
     }
 }

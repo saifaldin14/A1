@@ -65,6 +65,9 @@ public class Request implements Runnable {
             case "UNPIN":
                 processUnpinRequest();
                 break;
+            case "DISCONNECT":
+                processDisconnectRequest();
+                break;
             default:
                 processInvalidRequest();
         }
@@ -231,6 +234,10 @@ public class Request implements Runnable {
     }
 
     private void processUnpinRequest() {
+    }
+
+    private void processDisconnectRequest() {
+        shouldRun = false;
     }
 
     private void processInvalidRequest() {

@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Notes {
-    private int width;
+    public int width;
     private int height;
     ArrayList<String> colors = new ArrayList<String>();
     HashMap<Integer, Note> notes = new HashMap<Integer, Note>();
@@ -22,8 +22,8 @@ public class Notes {
         return notes.get(id);
     }
 
-    public ArrayList<Note> getRegular (String color, ArrayList<Integer> coordinates, String refersTo) {
-        ArrayList<Note> returnNotes = new ArrayList<Note>();
+    public HashMap<Integer, Note> getRegular (String color, ArrayList<Integer> coordinates, String refersTo) {
+        HashMap<Integer, Note> returnNotes = new HashMap<Integer, Note>();
         boolean isColor = !color.isEmpty(); // Will be true is color is not empty and false if it is empty
         boolean isCoord = true ? coordinates.size() > 0 : false; // Will be true is there are coordinates and false if there aren;t
         boolean isRefer = !refersTo.isEmpty(); // Will be true if there is a string and false if there isn't
@@ -44,18 +44,18 @@ public class Notes {
                 shouldRefer = true;
 
             if (shouldColor && shouldCoord && shouldRefer)
-                returnNotes.add(note);
+                returnNotes.put(note.getId(), note);
         }
 
         return returnNotes;
     }
 
-    public ArrayList<Note> getPin() {
-        ArrayList<Note> returnNotes = new ArrayList<Note>();
+    public HashMap<Integer, Note> getPin() {
+        HashMap<Integer, Note> returnNotes = new HashMap<Integer, Note>();
 
         for (Note note : notes.values()) {
             if (note.getPinStatus())
-                returnNotes.add(note);
+                returnNotes.put(note.getId(), note);
         }
         return returnNotes;
     }
@@ -63,7 +63,7 @@ public class Notes {
     public synchronized void post(int x, int y, int width, int height, String color, String msg) {
         int id = notes.size() + 1;
         if (checkColors(color) && checkCoordinates(x, y) && checkDimensions(width, height)) {
-            Note note = new Note(x, y, width, height, color, msg);
+            Note note = new Note(id, x, y, width, height, color, msg);
             notes.put(id, note);
         }
     }

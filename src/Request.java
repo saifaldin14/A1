@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Request implements Runnable {
     final static String CRLF = "\r\n";
@@ -36,53 +35,56 @@ public class Request implements Runnable {
         // Set up input stream filters.
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-        // Get the request line of the HTTP request message.
-        String requestLine = br.readLine();
+        while (shouldRun) {
+            // Get the request line of the HTTP request message.
+            String requestLine = br.readLine();
 
-        String[] splitStr = requestLine.split("\\s+");
+            String[] splitStr = requestLine.split("\\s+");
 
-        String methodType = splitStr[0];
+            String methodType = splitStr[0];
 
-        switch (methodType) {
-            case "5555":
-                processInitializeRequest(splitStr);
-                break;
-            case "GET":
-                processGetRequest(splitStr);
-                break;
-            case "POST":
-                processPostRequest(splitStr);
-                break;
-            case "CLEAR":
-                processClearRequest();
-                break;
-            case "SHAKE":
-                processShakeRequest();
-                break;
-            case "PIN":
-                processPinRequest(splitStr);
-                break;
-            case "UNPIN":
-                processUnpinRequest(splitStr);
-                break;
-            case "DISCONNECT":
-                processDisconnectRequest();
-                break;
-            default:
-                processInvalidRequest();
+            switch (methodType) {
+                case "5555":
+                    processInitializeRequest(splitStr);
+                    break;
+                case "GET":
+                    processGetRequest(splitStr);
+                    break;
+                case "POST":
+                    processPostRequest(splitStr);
+                    break;
+                case "CLEAR":
+                    processClearRequest();
+                    break;
+                case "SHAKE":
+                    processShakeRequest();
+                    break;
+                case "PIN":
+                    processPinRequest(splitStr);
+                    break;
+                case "UNPIN":
+                    processUnpinRequest(splitStr);
+                    break;
+                case "DISCONNECT":
+                    processDisconnectRequest();
+                    break;
+                default:
+                    processInvalidRequest();
+            }
+
+            //Construct response message (check Web server example)
+            String statusLine = null;
+            if (statusCode.equals("OK")) {
+                statusLine = "OK" + CRLF;
+            } else {
+                statusLine = "ERROR" + CRLF;
+            }
+            // Send the status line.
+            os.writeBytes(statusLine);
+
+            // Send a blank line to indicate the end of the header lines.
+            os.writeBytes(CRLF);
         }
-        //Construct response message (check Web server example)
-        String statusLine = null;
-        if (statusCode.equals("OK")) {
-            statusLine = "OK" + CRLF;
-        } else {
-            statusLine = "ERROR" + CRLF;
-        }
-        // Send the status line.
-        os.writeBytes(statusLine);
-
-        // Send a blank line to indicate the end of the header lines.
-        os.writeBytes(CRLF);
 
         // Close streams and socket.
         os.close();
@@ -114,6 +116,8 @@ public class Request implements Runnable {
         }
 
         notes = new Notes(width, height, colors);
+
+        System.out.println(notes.width);
     }
 
     private void processGetRequest(String[] splitStr) {
@@ -122,7 +126,7 @@ public class Request implements Runnable {
             return;
         }
 
-        ArrayList<Note> fetchedNotes = new ArrayList<Note>();
+        HashMap<Integer, Note> fetchedNotes = new HashMap<Integer, Note>();
         String color = "";
         ArrayList<Integer> coordinates = new ArrayList<Integer>();
         String refersTo = "";
@@ -146,12 +150,17 @@ public class Request implements Runnable {
             fetchedNotes = notes.getRegular(color, coordinates, refersTo);
         }
 
-        try {
-            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-            objectOutput.writeObject(fetchedNotes);
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Print message for debugging only
+        for (Note note : fetchedNotes.values()) {
+            System.out.println(note.getId());
         }
+
+//        try {
+//            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+//            objectOutput.writeObject(fetchedNotes);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private ArrayList<Integer> processGetContains(String[] splitStr) {
@@ -196,7 +205,7 @@ public class Request implements Runnable {
     }
 
     private void processPostRequest(String[] splitStr) {
-        // Requirements: POST x y width height message
+        // Requirements: POST x y width height color message
         if (splitStr.length < 7) {
             processInvalidRequest();
             return;
@@ -220,6 +229,8 @@ public class Request implements Runnable {
             processInvalidRequest();
             return;
         }
+
+        System.out.println(notes.getNote(1).getMessage());
     }
 
     private void processClearRequest() {

@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Note {
+    private int id;
     private int x;
     private int y;
     private int noteWidth;
@@ -11,15 +12,16 @@ public class Note {
     private int pinNumber;
     private boolean pinStatus;
 
-    public Note(int pX, int pY, int width, int height, String clr, String msg) {
-        x = pX;
-        y = pY;
-        noteWidth = width;
-        noteHeight = height;
-        color = clr;
-        message = msg;
-        pinNumber = 0;
-        pinStatus = false;
+    public Note(int id, int pX, int pY, int width, int height, String clr, String msg) {
+        this.id = id;
+        this.x = pX;
+        this.y = pY;
+        this.noteWidth = width;
+        this.noteHeight = height;
+        this.color = clr;
+        this.message = msg;
+        this.pinNumber = 0;
+        this.pinStatus = false;
     }
 
     public synchronized void pinValue() {
@@ -34,6 +36,10 @@ public class Note {
             pinNumber = 0;
         }
         setPinStatus();
+    }
+
+    public int getId() {
+        return id;
     }
 
     public boolean getPinStatus() {

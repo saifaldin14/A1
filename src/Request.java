@@ -7,6 +7,7 @@ public class Request implements Runnable {
     final static String CRLF = "\r\n";
     Socket socket;
     private boolean shouldRun = true;
+    private String statusCode = "OK";
     private Notes notes = new Notes();
 
     // Constructor
@@ -68,6 +69,17 @@ public class Request implements Runnable {
                 processInvalidRequest();
         }
         //Construct response message (check Web server example)
+        String statusLine = null;
+        if (statusCode.equals("OK")) {
+            statusLine = "OK" + CRLF;
+        } else {
+            statusLine = "ERROR" + CRLF;
+        }
+        // Send the status line.
+        os.writeBytes(statusLine);
+
+        // Send a blank line to indicate the end of the header lines.
+        os.writeBytes(CRLF);
 
         // Close streams and socket.
         os.close();
@@ -129,6 +141,13 @@ public class Request implements Runnable {
             }
 
             fetchedNotes = notes.getRegular(color, coordinates, refersTo);
+        }
+
+        try {
+            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            objectOutput.writeObject(fetchedNotes);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -212,32 +231,8 @@ public class Request implements Runnable {
     }
 
     private void processUnpinRequest() {
-
     }
 
     private void processInvalidRequest() {
-
-    }
-
-    private static void sendBytes(FileInputStream fis,
-                                  OutputStream os) throws Exception {
-        // Construct a 1K buffer to hold bytes on their way to the socket.
-        byte[] buffer = new byte[1024];
-        int bytes = 0;
-
-        // Copy requested file into the socket's output stream.
-        while ((bytes = fis.read(buffer)) != -1) {
-            os.write(buffer, 0, bytes);
-        }
-    }
-
-    private static String contentType(String fileName) {
-        if(fileName.endsWith(".htm") || fileName.endsWith(".html")) {
-            return "text/html";
-        }
-        if(fileName.endsWith(".ram") || fileName.endsWith(".ra")) {
-            return "audio/x-pn-realaudio";
-        }
-        return "application/octet-stream" ;
     }
 }

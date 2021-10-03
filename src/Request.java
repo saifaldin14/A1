@@ -118,32 +118,59 @@ public class Request implements Runnable {
             if (splitStr[1].contains("color")) {
                 String[] colorSplit = splitStr[1].split("=");
                 color = colorSplit[1];
-            } else if (splitStr[1].contains("contains")) {
-                try {
-                    coordinates.add(Integer.parseInt(splitStr[2]));
-                    coordinates.add(Integer.parseInt(splitStr[3]));
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    processInvalidRequest();
-                    return;
-                } catch (NumberFormatException e) {
-                    processInvalidRequest();
-                    return;
-                }
-            } else if (splitStr[1].contains("refersTo")) {
-                try {
-                    refersTo += splitStr[2];
 
-                    for (int i = 3; i < splitStr.length; i++) {
-                        refersTo += " " + splitStr[i];
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    processInvalidRequest();
-                    return;
+                if (splitStr.length > 2) {
+                    coordinates = processGetContains(splitStr);
+                    refersTo = processGetRefersTo(splitStr);
                 }
+            } else {
+                coordinates = processGetContains(splitStr);
+                refersTo = processGetRefersTo(splitStr);
             }
 
             fetchedNotes = notes.getRegular(color, coordinates, refersTo);
         }
+    }
+
+    private ArrayList<Integer> processGetContains(String[] splitStr) {
+        ArrayList<Integer> coordinates = new ArrayList<Integer>();
+        int i = 0;
+
+        while (i < splitStr.length && !splitStr[i].contains("contains"))
+            i++;
+
+        try {
+            coordinates.add(Integer.parseInt(splitStr[i + 1]));
+            coordinates.add(Integer.parseInt(splitStr[i + 2]));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            processInvalidRequest();
+            return coordinates;
+        } catch (NumberFormatException e) {
+            processInvalidRequest();
+            return coordinates;
+        }
+        return coordinates;
+    }
+
+    private String processGetRefersTo (String[] splitStr) {
+        String refersTo = "";
+        int i = 0;
+
+        while (i < splitStr.length && !splitStr[i].contains("refersTo"))
+            i++;
+
+        try {
+            refersTo += splitStr[i + 1];
+
+            for (int j = i + 2; i < splitStr.length; i++) {
+                refersTo += " " + splitStr[i];
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            processInvalidRequest();
+            return refersTo;
+        }
+
+        return refersTo;
     }
 
     private void processPostRequest(String[] splitStr) {

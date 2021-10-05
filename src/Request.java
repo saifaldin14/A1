@@ -98,6 +98,7 @@ public class Request implements Runnable {
         os.close();
         br.close();
         oos.close();
+        outputWriter.close();
         socket.close();
     }
 
@@ -221,7 +222,6 @@ public class Request implements Runnable {
 
         try {
             outputWriter.flush();
-            outputWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

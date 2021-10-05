@@ -66,7 +66,7 @@ public class Note implements Serializable {
 
     public String getStringVersion() {
         String ret = "";
-        ret += x + " " + y + " " + noteWidth + " " + noteHeight;
+        ret += id + " " + x + " " + y + " " + noteWidth + " " + noteHeight;
         ret += " " + color + " " + pinStatus + " " + message;
 
         System.out.println(ret);

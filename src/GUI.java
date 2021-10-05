@@ -53,8 +53,8 @@ public class GUI implements ActionListener {
         //Button click event listeners
         connectButton.addActionListener(this::connectPerformed);
         disconnectButton.addActionListener(this::disconnectPerformed);
-        pinButton.addActionListener(this);
-        unpinButton.addActionListener(this);
+        pinButton.addActionListener(this::pinPerformed);
+        unpinButton.addActionListener(this::unpinPerformed);
         clearButton.addActionListener(this::clearPerformed);
         shakeButton.addActionListener(this::shakePerformed);
         postButton.addActionListener(this::postPerformed);
@@ -110,11 +110,12 @@ public class GUI implements ActionListener {
     }
 
     public void getPerformed(ActionEvent e) throws IOException {
+        this.comboBox.removeAllItems();
+
         if (!gett.getText().isEmpty()) {
             String getReq = "GET " + gett.getText();
             ArrayList<String> content = client.getReturnedNotes(getReq);
 
-            this.comboBox.removeAllItems();
             for (String c : content) {
                 this.comboBox.addItem(c);
             }
@@ -122,8 +123,24 @@ public class GUI implements ActionListener {
     }
 
     public void postPerformed(ActionEvent e) {
-        String postReq = "POST " + post.getText();
-        client.sendRequestMessage(postReq);
+        if (!post.getText().isEmpty()) {
+            String postReq = "POST " + post.getText();
+            client.sendRequestMessage(postReq);
+        }
+    }
+
+    public void pinPerformed(ActionEvent e) {
+        String x = String.valueOf(comboBox.getSelectedItem());
+        String[] splitStr = x.split("\\s+");
+        String request = "PIN " + splitStr[0];
+        client.sendRequestMessage(request);
+    }
+
+    public void unpinPerformed(ActionEvent e) {
+        String x = String.valueOf(comboBox.getSelectedItem());
+        String[] splitStr = x.split("\\s+");
+        String request = "UNPIN " + splitStr[0];
+        client.sendRequestMessage(request);
     }
 
     public void clearPerformed (ActionEvent e) {

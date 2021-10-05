@@ -38,6 +38,13 @@ public class GUI implements ActionListener {
         gett.setBounds(100, 20, 165, 25);
 
 
+        //combo boxes
+
+        String[] results = {"result1", "result2", "result3"};
+
+        JComboBox comboBox = new JComboBox(results);
+
+
         //Button click event listeners
         connectButton.addActionListener(this);
         disconnectButton.addActionListener(this);
@@ -47,6 +54,7 @@ public class GUI implements ActionListener {
         shakeButton.addActionListener(this);
         postButton.addActionListener(this);
         getButton.addActionListener(this);
+        comboBox.addActionListener(this);
 
         // the panel with the button and text
         JPanel panel = new JPanel();
@@ -70,6 +78,7 @@ public class GUI implements ActionListener {
         panel.add(gett);
         panel.add(getButton);
         panel.add(result);
+        panel.add(comboBox);
 
 
         // set up the frame and display it

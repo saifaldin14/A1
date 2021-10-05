@@ -11,8 +11,12 @@ public class GUI implements ActionListener {
     private JLabel getReq = new JLabel("Enter required properties here: ");
     private JLabel result = new JLabel("THIS NEEDS TO BE LIVE DATA", SwingConstants.CENTER);
     private JFrame frame = new JFrame();
+    private JTextField post = null;
+    private JTextField gett = null;
+    private Client client = null;
 
     public GUI() {
+        this.client = new Client();
 
         // the clickable buttons
         JButton connectButton = new JButton("Connect");
@@ -31,11 +35,11 @@ public class GUI implements ActionListener {
         JTextField portNum = new JTextField(20);
         portNum.setBounds(100, 20, 165, 25);
 
-        JTextField post = new JTextField(20);
-        post.setBounds(100,20, 165, 25);
+        this.post = new JTextField(20);
+        this.post.setBounds(100,20, 165, 25);
 
-        JTextField gett = new JTextField(20);
-        gett.setBounds(100, 20, 165, 25);
+        this.gett = new JTextField(20);
+        this.gett.setBounds(100, 20, 165, 25);
 
 
         //combo boxes
@@ -46,13 +50,13 @@ public class GUI implements ActionListener {
 
 
         //Button click event listeners
-        connectButton.addActionListener(this);
-        disconnectButton.addActionListener(this);
+        connectButton.addActionListener(this::connectPerformed);
+        disconnectButton.addActionListener(this::disconnectPerformed);
         pinButton.addActionListener(this);
         unpinButton.addActionListener(this);
-        clearButton.addActionListener(this);
-        shakeButton.addActionListener(this);
-        postButton.addActionListener(this);
+        clearButton.addActionListener(this::clearPerformed);
+        shakeButton.addActionListener(this::shakePerformed);
+        postButton.addActionListener(this::postPerformed);
         getButton.addActionListener(this);
         comboBox.addActionListener(this);
 
@@ -60,6 +64,7 @@ public class GUI implements ActionListener {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
         panel.setLayout(new GridLayout(0, 1));
+        panel.add(comboBox);
         panel.add(label);
         panel.add(ipAddy);
         panel.add(ipAddyy);
@@ -78,7 +83,6 @@ public class GUI implements ActionListener {
         panel.add(gett);
         panel.add(getButton);
         panel.add(result);
-        panel.add(comboBox);
 
 
         // set up the frame and display it
@@ -92,6 +96,28 @@ public class GUI implements ActionListener {
     // process the button clicks
     public void actionPerformed(ActionEvent e) {
 
+    }
+
+    public void connectPerformed(ActionEvent e) {
+        client.sendRequestMessage("5555 100 100 red blue green");
+    }
+
+    public void postPerformed(ActionEvent e) {
+        String postReq = "POST " + post.getText();
+        client.sendRequestMessage(postReq);
+    }
+
+    public void clearPerformed (ActionEvent e) {
+        client.sendRequestMessage("CLEAR");
+    }
+
+    public void shakePerformed (ActionEvent e) {
+        client.sendRequestMessage("SHAKE");
+    }
+
+    public void disconnectPerformed (ActionEvent e) {
+        client.sendRequestMessage("DISCONNECT");
+        client.disconnect();
     }
 
     // create one Frame

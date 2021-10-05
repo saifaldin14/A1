@@ -229,7 +229,6 @@ public class Request implements Runnable {
             processInvalidRequest();
             return;
         }
-
         System.out.println(notes.getNote(1).getMessage());
     }
 
@@ -266,6 +265,7 @@ public class Request implements Runnable {
     }
 
     private void processDisconnectRequest() {
+        System.out.println("System disconnected");
         shouldRun = false;
     }
 

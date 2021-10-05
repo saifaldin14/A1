@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Note {
+public class Note implements Serializable {
     private int id;
     private int x;
     private int y;
@@ -62,6 +62,15 @@ public class Note {
     public int[] getCoordinates() {
         int[] coordinates = new int[]{x, y};
         return coordinates;
+    }
+
+    public String getStringVersion() {
+        String ret = "";
+        ret += x + " " + y + " " + noteWidth + " " + noteHeight;
+        ret += " " + color + " " + pinStatus + " " + message;
+
+        System.out.println(ret);
+        return ret;
     }
 
     private synchronized void setPinStatus() {

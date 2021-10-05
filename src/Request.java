@@ -5,13 +5,17 @@ import java.util.*;
 public class Request implements Runnable {
     final static String CRLF = "\r\n";
     Socket socket;
+    FileOutputStream fos;
     private boolean shouldRun = true;
     private String statusCode = "OK";
     private Notes notes = new Notes();
+    BufferedWriter outputWriter = null;
 
     // Constructor
     public Request(Socket socket) throws Exception {
         this.socket = socket;
+        this.fos = new FileOutputStream("t.tmp");
+        this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
     }
 
     // Implement the run() method of the Runnable interface.
@@ -35,6 +39,10 @@ public class Request implements Runnable {
         // Set up input stream filters.
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
+        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        ArrayList<String> empty = new ArrayList<String>();
+        oos.writeObject(empty);
+
         while (shouldRun) {
             // Get the request line of the HTTP request message.
             String requestLine = br.readLine();
@@ -48,16 +56,16 @@ public class Request implements Runnable {
                     processInitializeRequest(splitStr);
                     break;
                 case "GET":
-                    processGetRequest(splitStr);
+                    processGetRequest(splitStr, oos);
                     break;
                 case "POST":
                     processPostRequest(splitStr);
                     break;
                 case "CLEAR":
-                    processClearRequest();
+                    processClearRequest(oos);
                     break;
                 case "SHAKE":
-                    processShakeRequest();
+                    processShakeRequest(oos);
                     break;
                 case "PIN":
                     processPinRequest(splitStr);
@@ -89,6 +97,7 @@ public class Request implements Runnable {
         // Close streams and socket.
         os.close();
         br.close();
+        oos.close();
         socket.close();
     }
 
@@ -120,7 +129,7 @@ public class Request implements Runnable {
         System.out.println(notes.width);
     }
 
-    private void processGetRequest(String[] splitStr) {
+    private void processGetRequest(String[] splitStr, ObjectOutputStream oos) {
         if (splitStr.length < 2) {
             processInvalidRequest();
             return;
@@ -155,14 +164,7 @@ public class Request implements Runnable {
             System.out.println(note.getId());
         }
 
-        ArrayList<String> strFetchedNotes = getReturnGet(fetchedNotes);
-
-        try {
-            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-            objectOutput.writeObject(strFetchedNotes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getReturnGet(fetchedNotes);
     }
 
     private ArrayList<Integer> processGetContains(String[] splitStr) {
@@ -206,21 +208,25 @@ public class Request implements Runnable {
         return refersTo;
     }
 
-    private ArrayList<String> getReturnGet (HashMap<Integer, Note> fetchedNotes) {
-        ArrayList<String> getReturn = new ArrayList<String>();
-
+    private void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
         for (Note note : fetchedNotes.values()) {
-            String strNote = "";
-            strNote += note.getCoordinates().toString() + " ";
-            strNote += note.getNoteDimensions().toString() + " ";
-            strNote += note.getColor() + " ";
-            strNote += note.getPinStatus() + " ";
-            strNote += note.getMessage();
-            getReturn.add(strNote);
+            String strNote = note.getStringVersion();
+            try {
+                outputWriter.write(strNote);
+                outputWriter.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        return getReturn;
+        try {
+            outputWriter.flush();
+            outputWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
     private void processPostRequest(String[] splitStr) {
         // Requirements: POST x y width height color message
         if (splitStr.length < 7) {
@@ -249,29 +255,16 @@ public class Request implements Runnable {
         System.out.println(notes.getNote(1).getMessage());
     }
 
-    private void processClearRequest() {
+    private void processClearRequest(ObjectOutputStream oos) {
         notes.clear();
-        ArrayList<String> strFetchedNotes = new ArrayList<String>();
-
-        try {
-            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-            objectOutput.writeObject(strFetchedNotes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        HashMap<Integer, Note> strFetchedNotes = new HashMap<Integer, Note>();
+        getReturnGet(strFetchedNotes);
     }
 
-    private void processShakeRequest() {
+    private void processShakeRequest(ObjectOutputStream oos) {
         notes.shake();
         HashMap<Integer, Note> pinned = notes.getPin();
-        ArrayList<String> strFetchedNotes = getReturnGet(pinned);
-
-        try {
-            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-            objectOutput.writeObject(strFetchedNotes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        getReturnGet(pinned);
     }
 
     private void processPinRequest(String[] splitStr) {
@@ -305,5 +298,17 @@ public class Request implements Runnable {
 
     private void processInvalidRequest() {
         statusCode = "ERROR";
+    }
+
+    private static void sendBytes(FileInputStream fis,
+                                  OutputStream os) throws Exception {
+        // Construct a 1K buffer to hold bytes on their way to the socket.
+        byte[] buffer = new byte[1024];
+        int bytes = 0;
+
+        // Copy requested file into the socket's output stream.
+        while ((bytes = fis.read(buffer)) != -1) {
+            os.write(buffer, 0, bytes);
+        }
     }
 }

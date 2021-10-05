@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class GUI implements ActionListener {
 
@@ -57,7 +58,7 @@ public class GUI implements ActionListener {
         clearButton.addActionListener(this::clearPerformed);
         shakeButton.addActionListener(this::shakePerformed);
         postButton.addActionListener(this::postPerformed);
-        getButton.addActionListener(this);
+        getButton.addActionListener(this::getPerformed);
         comboBox.addActionListener(this);
 
         // the panel with the button and text
@@ -100,6 +101,12 @@ public class GUI implements ActionListener {
 
     public void connectPerformed(ActionEvent e) {
         client.sendRequestMessage("5555 100 100 red blue green");
+    }
+
+    public void getPerformed(ActionEvent e) {
+        String getReq = "GET " + gett.getText();
+        ArrayList<String> content = client.getReturnedNotes(getReq);
+        content = client.getReturnedNotes(getReq);
     }
 
     public void postPerformed(ActionEvent e) {

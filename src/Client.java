@@ -1,6 +1,7 @@
 //Create plan for how we will structure the client app
 import java.io.* ;
 import java.net.* ;
+import java.util.*;
 
 public class Client {
     private BufferedReader in = null;
@@ -12,6 +13,7 @@ public class Client {
             this.socket = new Socket("localhost", 5555);
             this.pr = new PrintWriter(socket.getOutputStream());
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -20,6 +22,29 @@ public class Client {
     public void sendRequestMessage(String request) {
         pr.println(request);
         pr.flush();
+    }
+
+    public ArrayList<String> getReturnedNotes (String request) {
+
+        sendRequestMessage(request);
+
+        ArrayList<String> ret = new ArrayList<String>();
+        try {
+            File textData = new File("text.txt");
+            Scanner dataReader = new Scanner(textData);
+            while (dataReader.hasNextLine()) {
+                String data = dataReader.nextLine();
+                ret.add(data);
+            }
+            dataReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+
+        System.out.println(ret);
+
+        return ret;
     }
 
     public void disconnect() {

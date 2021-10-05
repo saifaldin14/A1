@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Notes {
+public class Notes implements Serializable {
     public int width;
     private int height;
     ArrayList<String> colors = new ArrayList<String>();

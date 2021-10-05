@@ -10,7 +10,7 @@ public class Note {
     private String message;
     private String color;
     private int pinNumber;
-    private boolean pinStatus;
+    private String pinStatus;
 
     public Note(int id, int pX, int pY, int width, int height, String clr, String msg) {
         this.id = id;
@@ -21,7 +21,7 @@ public class Note {
         this.color = clr;
         this.message = msg;
         this.pinNumber = 0;
-        this.pinStatus = false;
+        this.pinStatus = "Unpinned";
     }
 
     public synchronized void pinValue() {
@@ -42,7 +42,7 @@ public class Note {
         return id;
     }
 
-    public boolean getPinStatus() {
+    public String getPinStatus() {
         return (pinStatus);
     }
 
@@ -66,9 +66,9 @@ public class Note {
 
     private synchronized void setPinStatus() {
         if (pinNumber > 0) {
-            pinStatus = true;
+            pinStatus = "Pinned";
         } else {
-            pinStatus = false;
+            pinStatus = "Unpinned";
         }
     }
 }

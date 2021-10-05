@@ -155,12 +155,14 @@ public class Request implements Runnable {
             System.out.println(note.getId());
         }
 
-//        try {
-//            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
-//            objectOutput.writeObject(fetchedNotes);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        ArrayList<String> strFetchedNotes = getReturnGet(fetchedNotes);
+
+        try {
+            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            objectOutput.writeObject(strFetchedNotes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<Integer> processGetContains(String[] splitStr) {
@@ -204,6 +206,21 @@ public class Request implements Runnable {
         return refersTo;
     }
 
+    private ArrayList<String> getReturnGet (HashMap<Integer, Note> fetchedNotes) {
+        ArrayList<String> getReturn = new ArrayList<String>();
+
+        for (Note note : fetchedNotes.values()) {
+            String strNote = "";
+            strNote += note.getCoordinates().toString() + " ";
+            strNote += note.getNoteDimensions().toString() + " ";
+            strNote += note.getColor() + " ";
+            strNote += note.getPinStatus() + " ";
+            strNote += note.getMessage();
+            getReturn.add(strNote);
+        }
+
+        return getReturn;
+    }
     private void processPostRequest(String[] splitStr) {
         // Requirements: POST x y width height color message
         if (splitStr.length < 7) {
@@ -234,10 +251,27 @@ public class Request implements Runnable {
 
     private void processClearRequest() {
         notes.clear();
+        ArrayList<String> strFetchedNotes = new ArrayList<String>();
+
+        try {
+            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            objectOutput.writeObject(strFetchedNotes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processShakeRequest() {
         notes.shake();
+        HashMap<Integer, Note> pinned = notes.getPin();
+        ArrayList<String> strFetchedNotes = getReturnGet(pinned);
+
+        try {
+            ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+            objectOutput.writeObject(strFetchedNotes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processPinRequest(String[] splitStr) {

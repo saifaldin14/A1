@@ -54,7 +54,7 @@ public class Notes {
         HashMap<Integer, Note> returnNotes = new HashMap<Integer, Note>();
 
         for (Note note : notes.values()) {
-            if (note.getPinStatus())
+            if (note.getPinStatus().equals("Pinned"))
                 returnNotes.put(note.getId(), note);
         }
         return returnNotes;
@@ -74,7 +74,7 @@ public class Notes {
 
     public synchronized void shake() {
         for (int i = 0; i < notes.size(); i++) {
-            if (!notes.get(i).getPinStatus())
+            if (notes.get(i).getPinStatus().equals("Unpinned"))
                 notes.remove(i);
         }
     }

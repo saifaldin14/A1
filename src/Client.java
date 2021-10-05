@@ -24,22 +24,25 @@ public class Client {
         pr.flush();
     }
 
-    public ArrayList<String> getReturnedNotes (String request) {
+    public ArrayList<String> getReturnedNotes (String request) throws IOException {
 
         sendRequestMessage(request);
-
         ArrayList<String> ret = new ArrayList<String>();
-        try {
-            File textData = new File("text.txt");
-            Scanner dataReader = new Scanner(textData);
-            while (dataReader.hasNextLine()) {
-                String data = dataReader.nextLine();
-                ret.add(data);
+        String status = in.readLine();
+
+        if (status.equals("OK")) {
+            try {
+                File textData = new File("text.txt");
+                Scanner dataReader = new Scanner(textData);
+                while (dataReader.hasNextLine()) {
+                    String data = dataReader.nextLine();
+                    ret.add(data);
+                }
+                dataReader.close();
+            } catch (FileNotFoundException e) {
+                System.out.println("An error occurred.");
+                e.printStackTrace();
             }
-            dataReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
         }
 
         System.out.println(ret);

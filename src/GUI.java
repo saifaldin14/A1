@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class GUI implements ActionListener {
@@ -15,9 +16,12 @@ public class GUI implements ActionListener {
     private JTextField post = null;
     private JTextField gett = null;
     private Client client = null;
+    private ArrayList<String> results = null;
+    private JComboBox comboBox = null;
 
     public GUI() {
         this.client = new Client();
+        this.results =  new ArrayList<String>();
 
         // the clickable buttons
         JButton connectButton = new JButton("Connect");
@@ -42,12 +46,8 @@ public class GUI implements ActionListener {
         this.gett = new JTextField(20);
         this.gett.setBounds(100, 20, 165, 25);
 
-
-        //combo boxes
-
-        String[] results = {"result1", "result2", "result3"};
-
-        JComboBox comboBox = new JComboBox(results);
+        this.comboBox = new JComboBox(results.toArray());
+        this.comboBox.setModel(new DefaultComboBoxModel(results.toArray()));
 
 
         //Button click event listeners
@@ -58,7 +58,13 @@ public class GUI implements ActionListener {
         clearButton.addActionListener(this::clearPerformed);
         shakeButton.addActionListener(this::shakePerformed);
         postButton.addActionListener(this::postPerformed);
-        getButton.addActionListener(this::getPerformed);
+        getButton.addActionListener(e -> {
+            try {
+                getPerformed(e);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
         comboBox.addActionListener(this);
 
         // the panel with the button and text
@@ -103,10 +109,16 @@ public class GUI implements ActionListener {
         client.sendRequestMessage("5555 100 100 red blue green");
     }
 
-    public void getPerformed(ActionEvent e) {
-        String getReq = "GET " + gett.getText();
-        ArrayList<String> content = client.getReturnedNotes(getReq);
-        content = client.getReturnedNotes(getReq);
+    public void getPerformed(ActionEvent e) throws IOException {
+        if (!gett.getText().isEmpty()) {
+            String getReq = "GET " + gett.getText();
+            ArrayList<String> content = client.getReturnedNotes(getReq);
+
+            this.comboBox.removeAllItems();
+            for (String c : content) {
+                this.comboBox.addItem(c);
+            }
+        }
     }
 
     public void postPerformed(ActionEvent e) {

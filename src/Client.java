@@ -34,8 +34,9 @@ public class Client {
         String status = in.readLine();
 
         String str = "";
+        this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         str = br.readLine();
-        while (str.equals("OK") || str.equals("")) {
+        while (str.equals("OK") || str.equals("ERROR") || str.equals("")) {
             if (str.equals("Nothing found"))
                 break;
             str = br.readLine();

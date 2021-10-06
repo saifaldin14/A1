@@ -33,39 +33,17 @@ public class Client {
         ArrayList<String> ret = new ArrayList<String>();
         String status = in.readLine();
 
-        if (status.equals("OK")) {
-//            String line;
-//            while ((line = in.readLine()) != null) {
-//                System.out.println(line);
-//                if (!line.equals("OK") && !line.isEmpty())
-//                    ret.add(line);
-//            }
-//            System.out.println(in.ready());
-            String str = "";
+        String str = "";
+        str = br.readLine();
+        while (str.equals("OK") || str.equals("")) {
+            if (str.equals("Nothing found"))
+                break;
             str = br.readLine();
-            while (str.equals("OK") || str.equals("")) {
-                if (str.equals("Nothing found"))
-                    break;
-                str = br.readLine();
-            }
-            
-            String[] temp = str.split(":");
-            for (String s : temp) {
-                ret.add(s);
-            }
+        }
 
-//            try {
-//                File textData = new File("text.txt");
-//                Scanner dataReader = new Scanner(textData);
-//                while (dataReader.hasNextLine()) {
-//                    String data = dataReader.nextLine();
-//                    ret.add(data);
-//                }
-//                dataReader.close();
-//            } catch (FileNotFoundException e) {
-//                System.out.println("An error occurred.");
-//                e.printStackTrace();
-//            }
+        String[] temp = str.split(":");
+        for (String s : temp) {
+            ret.add(s);
         }
 
         System.out.println(ret);

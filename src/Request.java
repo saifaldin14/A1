@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
@@ -7,7 +8,7 @@ public class Request implements Runnable {
     Socket socket;
     private boolean shouldRun = true;
     private String statusCode = "OK";
-    private Notes notes = new Notes();
+    private static Notes notes = new Notes();
     private BufferedWriter outputWriter;
     private PrintStream ps;
     private DataOutputStream os;
@@ -39,20 +40,6 @@ public class Request implements Runnable {
         // Get a reference to the socket's input and output streams.
         InputStream is = socket.getInputStream();
 
-        // Set up input stream filters.
-        BufferedReader tbr = new BufferedReader(new InputStreamReader(is));
-
-        String tempRequestLine = tbr.readLine();
-
-        String[] tempSplitStr = tempRequestLine.split("\\s+");
-
-        String tempMethodType = tempSplitStr[0];
-
-        if (tempMethodType.equals("CONNECT"))
-            shouldRun = true;
-
-        System.out.println(tempMethodType);
-
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
         while (shouldRun) {
@@ -65,14 +52,9 @@ public class Request implements Runnable {
 
             String methodType = splitStr[0];
 
-            System.out.println(methodType);
-
             switch (methodType) {
                 case "5555":
                     processInitializeRequest(splitStr);
-                    break;
-                case "CONNECT":
-                    shouldRun = true;
                     break;
                 case "GET":
                     processGetRequest(splitStr);
@@ -123,6 +105,10 @@ public class Request implements Runnable {
     }
 
     private void processInitializeRequest(String[] splitStr) {
+        if (splitStr.length == 1) {
+            System.out.println(notes.width);
+            return;
+        }
         // Initializing notes needs at least 4 elements (<port number>, <width>, <height>, <color>)
         if (splitStr.length < 4) {
             processInvalidRequest();

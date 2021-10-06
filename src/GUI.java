@@ -11,10 +11,10 @@ public class GUI implements ActionListener {
     private JLabel getMessage = new JLabel("Display GET results: ");
     private JLabel blank = new JLabel("Type your note here: ");
     private JLabel getReq = new JLabel("Enter required properties here: ");
-    private JLabel result = new JLabel("THIS NEEDS TO BE LIVE DATA", SwingConstants.CENTER);
     private JFrame frame = new JFrame();
     private JTextField post = null;
     private JTextField gett = null;
+    private  JTextField initializeBoardText = null;
     private Client client = null;
     private ArrayList<String> results = null;
     private JComboBox comboBox = null;
@@ -34,11 +34,8 @@ public class GUI implements ActionListener {
         JButton getButton = new JButton("Get");
 
         //text fields
-        JTextField initializeBoardText = new JTextField(20);
-        initializeBoardText.setBounds(100, 20, 165, 25);
-
-        JTextField portNum = new JTextField(20);
-        portNum.setBounds(100, 20, 165, 25);
+        this.initializeBoardText = new JTextField(20);
+        this.initializeBoardText.setBounds(100, 20, 165, 25);
 
         this.post = new JTextField(20);
         this.post.setBounds(100,20, 165, 25);
@@ -92,13 +89,10 @@ public class GUI implements ActionListener {
         panel.add(unpinButton);
         panel.add(clearButton);
         panel.add(shakeButton);
-        panel.add(portNum);
         panel.add(blank);
         panel.add(post);
         panel.add(postButton);
         panel.add(disconnectButton);
-        panel.add(result);
-
 
         // set up the frame and display it
         frame.add(panel, BorderLayout.CENTER);
@@ -115,12 +109,17 @@ public class GUI implements ActionListener {
 
     public void connectPerformed(ActionEvent e) {
         this.client = new Client();
-        client.sendRequestMessage("5555 100 100 red blue green");
+        String request = "5555";
+        if (!initializeBoardText.getText().isEmpty()) {
+            request += " " + initializeBoardText.getText();
+            System.out.println(request);
+            client.sendRequestMessage(request);
+        }
     }
 
     public void connectWithoutInitPerformed(ActionEvent e) {
         this.client = new Client();
-        client.sendRequestMessage("CONNECT");
+        client.sendRequestMessage("5555");
     }
 
     public void getPerformed(ActionEvent e) throws IOException {

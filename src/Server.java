@@ -12,16 +12,31 @@ import java.io.* ;
 import java.net.* ;
 
 public final class Server {
+    private static boolean shouldRun = true;
+
     public static void main(String[] args) throws Exception {
 
         ServerSocket serverSocket = null;
-        boolean shouldRun = true;
 
         try {
             serverSocket = new ServerSocket(5555);
         } catch (IOException e) {
             System.err.println("Could not listen on port: 5555.");
             System.exit(1);
+        }
+
+        if (!shouldRun) {
+            BufferedReader tbr = new BufferedReader(new InputStreamReader(serverSocket.accept().getInputStream()));
+
+            String tempRequestLine = tbr.readLine();
+
+            String[] tempSplitStr = tempRequestLine.split("\\s+");
+
+            String tempMethodType = tempSplitStr[0];
+
+            if (tempMethodType.equals("CONNECT"))
+                shouldRun = true;
+            System.out.println("Attempting CONNECT");
         }
 
         // Process HTTP service requests in an infinite loop.

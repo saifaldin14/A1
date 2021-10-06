@@ -31,7 +31,6 @@ public class Client {
 
         sendRequestMessage(request);
         ArrayList<String> ret = new ArrayList<String>();
-        String status = in.readLine();
 
         String str = "";
         this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));

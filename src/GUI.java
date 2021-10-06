@@ -7,8 +7,8 @@ import java.util.ArrayList;
 public class GUI implements ActionListener {
 
     private JLabel label = new JLabel("Welcome to your very own Notes Board.", SwingConstants.CENTER);
-    private JLabel ipAddy = new JLabel("IP Address: ");
-    private JLabel port = new JLabel("Port Number: ");
+    private JLabel initializeBoard = new JLabel("Board Initialization (width height colors): ");
+    private JLabel getMessage = new JLabel("Display GET results: ");
     private JLabel blank = new JLabel("Type your note here: ");
     private JLabel getReq = new JLabel("Enter required properties here: ");
     private JLabel result = new JLabel("THIS NEEDS TO BE LIVE DATA", SwingConstants.CENTER);
@@ -34,8 +34,8 @@ public class GUI implements ActionListener {
         JButton getButton = new JButton("Get");
 
         //text fields
-        JTextField ipAddyy = new JTextField(20);
-        ipAddyy.setBounds(100, 20, 165, 25);
+        JTextField initializeBoardText = new JTextField(20);
+        initializeBoardText.setBounds(100, 20, 165, 25);
 
         JTextField portNum = new JTextField(20);
         portNum.setBounds(100, 20, 165, 25);
@@ -56,7 +56,13 @@ public class GUI implements ActionListener {
         pinButton.addActionListener(this::pinPerformed);
         unpinButton.addActionListener(this::unpinPerformed);
         clearButton.addActionListener(this::clearPerformed);
-        shakeButton.addActionListener(this::shakePerformed);
+        shakeButton.addActionListener(e1 -> {
+            try {
+                shakePerformed(e1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         postButton.addActionListener(this::postPerformed);
         getButton.addActionListener(e -> {
             try {
@@ -71,24 +77,24 @@ public class GUI implements ActionListener {
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
         panel.setLayout(new GridLayout(0, 1));
-        panel.add(comboBox);
         panel.add(label);
-        panel.add(ipAddy);
-        panel.add(ipAddyy);
-        panel.add(port);
-        panel.add(portNum);
+        panel.add(initializeBoard);
+        panel.add(initializeBoardText);
         panel.add(connectButton);
-        panel.add(disconnectButton);
+        panel.add(getMessage);
+        panel.add(comboBox);
+        panel.add(getReq);
+        panel.add(gett);
+        panel.add(getButton);
         panel.add(pinButton);
         panel.add(unpinButton);
         panel.add(clearButton);
         panel.add(shakeButton);
+        panel.add(portNum);
         panel.add(blank);
         panel.add(post);
         panel.add(postButton);
-        panel.add(getReq);
-        panel.add(gett);
-        panel.add(getButton);
+        panel.add(disconnectButton);
         panel.add(result);
 
 
@@ -144,11 +150,17 @@ public class GUI implements ActionListener {
     }
 
     public void clearPerformed (ActionEvent e) {
+        this.comboBox.removeAllItems();
         client.sendRequestMessage("CLEAR");
     }
 
-    public void shakePerformed (ActionEvent e) {
-        client.sendRequestMessage("SHAKE");
+    public void shakePerformed (ActionEvent e) throws IOException {
+        this.comboBox.removeAllItems();
+        ArrayList<String> content = client.getReturnedNotes("SHAKE");
+
+        for (String c : content) {
+            this.comboBox.addItem(c);
+        }
     }
 
     public void disconnectPerformed (ActionEvent e) {

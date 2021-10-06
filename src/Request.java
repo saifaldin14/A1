@@ -5,7 +5,6 @@ import java.util.*;
 public class Request implements Runnable {
     final static String CRLF = "\r\n";
     Socket socket;
-    FileOutputStream fos;
     private boolean shouldRun = true;
     private String statusCode = "OK";
     private Notes notes = new Notes();
@@ -14,7 +13,6 @@ public class Request implements Runnable {
     // Constructor
     public Request(Socket socket) throws Exception {
         this.socket = socket;
-        this.fos = new FileOutputStream("t.tmp");
         this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
     }
 
@@ -39,10 +37,6 @@ public class Request implements Runnable {
         // Set up input stream filters.
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        ArrayList<String> empty = new ArrayList<String>();
-        oos.writeObject(empty);
-
         while (shouldRun) {
             // Get the request line of the HTTP request message.
             String requestLine = br.readLine();
@@ -56,16 +50,16 @@ public class Request implements Runnable {
                     processInitializeRequest(splitStr);
                     break;
                 case "GET":
-                    processGetRequest(splitStr, oos);
+                    processGetRequest(splitStr);
                     break;
                 case "POST":
                     processPostRequest(splitStr);
                     break;
                 case "CLEAR":
-                    processClearRequest(oos);
+                    processClearRequest();
                     break;
                 case "SHAKE":
-                    processShakeRequest(oos);
+                    processShakeRequest();
                     break;
                 case "PIN":
                     processPinRequest(splitStr);
@@ -97,7 +91,6 @@ public class Request implements Runnable {
         // Close streams and socket.
         os.close();
         br.close();
-        oos.close();
         outputWriter.close();
         socket.close();
     }
@@ -130,7 +123,7 @@ public class Request implements Runnable {
         System.out.println(notes.width);
     }
 
-    private void processGetRequest(String[] splitStr, ObjectOutputStream oos) {
+    private void processGetRequest(String[] splitStr) {
         if (splitStr.length < 2) {
             processInvalidRequest();
             return;
@@ -210,17 +203,14 @@ public class Request implements Runnable {
     }
 
     private void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
-        for (Note note : fetchedNotes.values()) {
-            String strNote = note.getStringVersion();
-            try {
+        try {
+            this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
+
+            for (Note note : fetchedNotes.values()) {
+                String strNote = note.getStringVersion();
                 outputWriter.write(strNote);
                 outputWriter.newLine();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
-
-        try {
             outputWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -255,13 +245,13 @@ public class Request implements Runnable {
         System.out.println(notes.getNote(1).getMessage());
     }
 
-    private void processClearRequest(ObjectOutputStream oos) {
+    private void processClearRequest() {
         notes.clear();
         HashMap<Integer, Note> strFetchedNotes = new HashMap<Integer, Note>();
         getReturnGet(strFetchedNotes);
     }
 
-    private void processShakeRequest(ObjectOutputStream oos) {
+    private void processShakeRequest() {
         notes.shake();
         HashMap<Integer, Note> pinned = notes.getPin();
         getReturnGet(pinned);
@@ -298,17 +288,5 @@ public class Request implements Runnable {
 
     private void processInvalidRequest() {
         statusCode = "ERROR";
-    }
-
-    private static void sendBytes(FileInputStream fis,
-                                  OutputStream os) throws Exception {
-        // Construct a 1K buffer to hold bytes on their way to the socket.
-        byte[] buffer = new byte[1024];
-        int bytes = 0;
-
-        // Copy requested file into the socket's output stream.
-        while ((bytes = fis.read(buffer)) != -1) {
-            os.write(buffer, 0, bytes);
-        }
     }
 }

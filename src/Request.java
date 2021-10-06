@@ -8,14 +8,18 @@ public class Request implements Runnable {
     private boolean shouldRun = true;
     private String statusCode = "OK";
     private Notes notes = new Notes();
-    private BufferedWriter outputWriter = null;
-    private DataOutputStream os = null;
+    private BufferedWriter outputWriter;
+    private PrintStream ps;
+    private DataOutputStream os;
+    private ObjectOutputStream outToClient;
 
     // Constructor
     public Request(Socket socket) throws Exception {
         this.socket = socket;
         this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
+        this.ps = new PrintStream(socket.getOutputStream());
         this.os = new DataOutputStream(socket.getOutputStream());
+        this.outToClient = new ObjectOutputStream(socket.getOutputStream());
     }
 
     // Implement the run() method of the Runnable interface.
@@ -207,16 +211,23 @@ public class Request implements Runnable {
         return refersTo;
     }
 
-    private void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
+    private synchronized void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
         try {
             writeStatus();
+//            ArrayList<String> retNotes = new ArrayList<String>();
+            String retNotes = "";
+            //outToClient.reset();
 
             for (Note note : fetchedNotes.values()) {
                 String strNote = note.getStringVersion();
-                os.writeBytes(strNote);
-                os.writeBytes(CRLF);
+                retNotes += strNote + ":";
             }
-            //os.close();
+            System.out.println(retNotes);
+            ps.println(retNotes);
+
+            if (retNotes.isEmpty())
+                ps.println("Nothing found");
+            ps.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

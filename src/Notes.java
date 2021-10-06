@@ -74,8 +74,8 @@ public class Notes implements Serializable {
 
     public synchronized void shake() {
         for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i).getPinStatus().equals("Unpinned"))
-                notes.remove(i);
+            if (notes.get(i + 1).getPinStatus().equals("Unpinned"))
+                notes.remove(i + 1);
         }
     }
 

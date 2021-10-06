@@ -4,16 +4,19 @@ import java.net.* ;
 import java.util.*;
 
 public class Client {
-    private BufferedReader in = null;
-    private PrintWriter pr = null;
-    private Socket socket = null;
+    private BufferedReader in;
+    private PrintWriter pr;
+    private Socket socket;
+    private ObjectInputStream inFromServer;
+    private BufferedReader br;
 
     public Client() {
         try {
             this.socket = new Socket("localhost", 5555);
             this.pr = new PrintWriter(socket.getOutputStream());
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
+            this.inFromServer = new ObjectInputStream(socket.getInputStream());
+            this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -24,24 +27,32 @@ public class Client {
         pr.flush();
     }
 
-    public ArrayList<String> getReturnedNotes (String request) throws IOException {
+    public synchronized ArrayList<String> getReturnedNotes (String request) throws IOException {
 
         sendRequestMessage(request);
         ArrayList<String> ret = new ArrayList<String>();
         String status = in.readLine();
 
         if (status.equals("OK")) {
-            String line;
-
-            while (in.ready()) {
-                System.out.println(in.ready());
-                line = in.readLine();
-                System.out.println(line);
-
-                if (!line.equals("OK") && !line.isEmpty())
-                    ret.add(line);
+//            String line;
+//            while ((line = in.readLine()) != null) {
+//                System.out.println(line);
+//                if (!line.equals("OK") && !line.isEmpty())
+//                    ret.add(line);
+//            }
+//            System.out.println(in.ready());
+            String str = "";
+            str = br.readLine();
+            while (str.equals("OK") || str.equals("")) {
+                if (str.equals("Nothing found"))
+                    break;
+                str = br.readLine();
             }
-            System.out.println(in.ready());
+            
+            String[] temp = str.split(":");
+            for (String s : temp) {
+                ret.add(s);
+            }
 
 //            try {
 //                File textData = new File("text.txt");

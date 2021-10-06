@@ -8,12 +8,14 @@ public class Request implements Runnable {
     private boolean shouldRun = true;
     private String statusCode = "OK";
     private Notes notes = new Notes();
-    BufferedWriter outputWriter = null;
+    private BufferedWriter outputWriter = null;
+    private DataOutputStream os = null;
 
     // Constructor
     public Request(Socket socket) throws Exception {
         this.socket = socket;
         this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
+        this.os = new DataOutputStream(socket.getOutputStream());
     }
 
     // Implement the run() method of the Runnable interface.
@@ -32,13 +34,14 @@ public class Request implements Runnable {
     private void processRequest() throws Exception {
         // Get a reference to the socket's input and output streams.
         InputStream is = socket.getInputStream();
-        DataOutputStream os = new DataOutputStream(socket.getOutputStream());
 
         // Set up input stream filters.
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
         while (shouldRun) {
             // Get the request line of the HTTP request message.
+            this.os = new DataOutputStream(socket.getOutputStream());
+
             String requestLine = br.readLine();
 
             String[] splitStr = requestLine.split("\\s+");
@@ -73,19 +76,6 @@ public class Request implements Runnable {
                 default:
                     processInvalidRequest();
             }
-
-            //Construct response message (check Web server example)
-            String statusLine = null;
-            if (statusCode.equals("OK")) {
-                statusLine = "OK" + CRLF;
-            } else {
-                statusLine = "ERROR" + CRLF;
-            }
-            // Send the status line.
-            os.writeBytes(statusLine);
-
-            // Send a blank line to indicate the end of the header lines.
-            os.writeBytes(CRLF);
         }
 
         // Close streams and socket.
@@ -93,6 +83,21 @@ public class Request implements Runnable {
         br.close();
         outputWriter.close();
         socket.close();
+    }
+
+    private void writeStatus() throws IOException {
+        //Construct response message (check Web server example)
+        String statusLine = null;
+        if (statusCode.equals("OK")) {
+            statusLine = "OK" + CRLF;
+        } else {
+            statusLine = "ERROR" + CRLF;
+        }
+        // Send the status line.
+        os.writeBytes(statusLine);
+
+        // Send a blank line to indicate the end of the header lines.
+        os.writeBytes(CRLF);
     }
 
     private void processInitializeRequest(String[] splitStr) {
@@ -204,17 +209,18 @@ public class Request implements Runnable {
 
     private void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
         try {
-            this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
+            writeStatus();
 
             for (Note note : fetchedNotes.values()) {
                 String strNote = note.getStringVersion();
-                outputWriter.write(strNote);
-                outputWriter.newLine();
+                os.writeBytes(strNote);
+                os.writeBytes(CRLF);
             }
-            outputWriter.flush();
+            //os.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     private void processPostRequest(String[] splitStr) {
@@ -238,7 +244,8 @@ public class Request implements Runnable {
             }
 
             notes.post(x, y, width, height, color, message);
-        } catch (NumberFormatException e) {
+            writeStatus();
+        } catch (NumberFormatException | IOException e) {
             processInvalidRequest();
             return;
         }
@@ -261,24 +268,26 @@ public class Request implements Runnable {
         int id = 0;
         try {
             id = Integer.parseInt(splitStr[1]);
-        } catch (NumberFormatException e) {
+            notes.getNote(id).pinValue();
+
+            writeStatus();
+        } catch (NumberFormatException | IOException e) {
             processInvalidRequest();
             return;
         }
-
-        notes.getNote(id).pinValue();
     }
 
     private void processUnpinRequest(String[] splitStr) {
         int id = 0;
         try {
             id = Integer.parseInt(splitStr[1]);
-        } catch (NumberFormatException e) {
+            notes.getNote(id).unpinValue();
+
+            writeStatus();
+        } catch (NumberFormatException | IOException e) {
             processInvalidRequest();
             return;
         }
-
-        notes.getNote(id).unpinValue();
     }
 
     private void processDisconnectRequest() {
@@ -288,5 +297,10 @@ public class Request implements Runnable {
 
     private void processInvalidRequest() {
         statusCode = "ERROR";
+        try {
+            writeStatus();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

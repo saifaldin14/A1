@@ -20,7 +20,6 @@ public class GUI implements ActionListener {
     private JComboBox comboBox = null;
 
     public GUI() {
-        this.client = new Client();
         this.results =  new ArrayList<String>();
 
         // the clickable buttons
@@ -112,13 +111,14 @@ public class GUI implements ActionListener {
     }
 
     public void connectPerformed(ActionEvent e) {
+        this.client = new Client();
         client.sendRequestMessage("5555 100 100 red blue green");
     }
 
     public void getPerformed(ActionEvent e) throws IOException {
-        this.comboBox.removeAllItems();
-
         if (!gett.getText().isEmpty()) {
+            this.comboBox.removeAllItems();
+
             String getReq = "GET " + gett.getText();
             ArrayList<String> content = client.getReturnedNotes(getReq);
 

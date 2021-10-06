@@ -24,6 +24,7 @@ public class GUI implements ActionListener {
 
         // the clickable buttons
         JButton connectButton = new JButton("Connect");
+        JButton connectWithoutInitButton = new JButton("Connect without Init");
         JButton disconnectButton = new JButton("Disconnect");
         JButton pinButton = new JButton("Pin");
         JButton unpinButton = new JButton("Unpin");
@@ -51,6 +52,7 @@ public class GUI implements ActionListener {
 
         //Button click event listeners
         connectButton.addActionListener(this::connectPerformed);
+        connectWithoutInitButton.addActionListener(this::connectWithoutInitPerformed);
         disconnectButton.addActionListener(this::disconnectPerformed);
         pinButton.addActionListener(this::pinPerformed);
         unpinButton.addActionListener(this::unpinPerformed);
@@ -80,6 +82,7 @@ public class GUI implements ActionListener {
         panel.add(initializeBoard);
         panel.add(initializeBoardText);
         panel.add(connectButton);
+        panel.add(connectWithoutInitButton);
         panel.add(getMessage);
         panel.add(comboBox);
         panel.add(getReq);
@@ -113,6 +116,11 @@ public class GUI implements ActionListener {
     public void connectPerformed(ActionEvent e) {
         this.client = new Client();
         client.sendRequestMessage("5555 100 100 red blue green");
+    }
+
+    public void connectWithoutInitPerformed(ActionEvent e) {
+        this.client = new Client();
+        client.sendRequestMessage("CONNECT");
     }
 
     public void getPerformed(ActionEvent e) throws IOException {

@@ -40,6 +40,19 @@ public class Request implements Runnable {
         InputStream is = socket.getInputStream();
 
         // Set up input stream filters.
+        BufferedReader tbr = new BufferedReader(new InputStreamReader(is));
+
+        String tempRequestLine = tbr.readLine();
+
+        String[] tempSplitStr = tempRequestLine.split("\\s+");
+
+        String tempMethodType = tempSplitStr[0];
+
+        if (tempMethodType.equals("CONNECT"))
+            shouldRun = true;
+
+        System.out.println(tempMethodType);
+
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
         while (shouldRun) {
@@ -52,9 +65,14 @@ public class Request implements Runnable {
 
             String methodType = splitStr[0];
 
+            System.out.println(methodType);
+
             switch (methodType) {
                 case "5555":
                     processInitializeRequest(splitStr);
+                    break;
+                case "CONNECT":
+                    shouldRun = true;
                     break;
                 case "GET":
                     processGetRequest(splitStr);
@@ -214,9 +232,7 @@ public class Request implements Runnable {
     private synchronized void getReturnGet (HashMap<Integer, Note> fetchedNotes) {
         try {
             writeStatus();
-//            ArrayList<String> retNotes = new ArrayList<String>();
             String retNotes = "";
-            //outToClient.reset();
 
             for (Note note : fetchedNotes.values()) {
                 String strNote = note.getStringVersion();

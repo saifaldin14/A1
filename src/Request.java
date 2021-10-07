@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
@@ -9,18 +8,13 @@ public class Request implements Runnable {
     private boolean shouldRun = true;
     private String statusCode = "OK";
     private static Notes notes = new Notes();
-    private BufferedWriter outputWriter;
     private PrintStream ps;
     private DataOutputStream os;
-    private ObjectOutputStream outToClient;
 
     // Constructor
     public Request(Socket socket) throws Exception {
         this.socket = socket;
-        this.outputWriter = new BufferedWriter(new FileWriter("text.txt"));
         this.ps = new PrintStream(socket.getOutputStream());
-        this.os = new DataOutputStream(socket.getOutputStream());
-        this.outToClient = new ObjectOutputStream(socket.getOutputStream());
     }
 
     // Implement the run() method of the Runnable interface.
@@ -85,7 +79,6 @@ public class Request implements Runnable {
         // Close streams and socket.
         os.close();
         br.close();
-        outputWriter.close();
         socket.close();
     }
 
@@ -106,7 +99,9 @@ public class Request implements Runnable {
 
     private void processInitializeRequest(String[] splitStr) {
         if (splitStr.length == 1) {
-            System.out.println(notes.width);
+            System.out.println("Successfully reconnected");
+            String message = "Board Width: " + notes.width + ", Board Height: " + notes.height;
+            System.out.println(message);
             return;
         }
         // Initializing notes needs at least 4 elements (<port number>, <width>, <height>, <color>)
@@ -133,7 +128,9 @@ public class Request implements Runnable {
 
         notes = new Notes(width, height, colors);
 
-        System.out.println(notes.width);
+        System.out.println("Successfully Initialized Board");
+        String message = "Board Width: " + notes.width + ", Board Height: " + notes.height;
+        System.out.println(message);
     }
 
     private void processGetRequest(String[] splitStr) {
@@ -166,10 +163,7 @@ public class Request implements Runnable {
             fetchedNotes = notes.getRegular(color, coordinates, refersTo);
         }
 
-        // Print message for debugging only
-        for (Note note : fetchedNotes.values()) {
-            System.out.println(note.getId());
-        }
+        System.out.println("Notes successfully retrieved");
 
         getReturnGet(fetchedNotes);
     }
@@ -224,7 +218,6 @@ public class Request implements Runnable {
                 String strNote = note.getStringVersion();
                 retNotes += strNote + ":";
             }
-            System.out.println(retNotes);
             ps.println(retNotes);
 
             if (retNotes.isEmpty())
@@ -262,17 +255,23 @@ public class Request implements Runnable {
             processInvalidRequest();
             return;
         }
-        System.out.println(notes.getNote(1).getMessage());
+        System.out.println("Note successfully posted");
     }
 
     private void processClearRequest() {
         notes.clear();
+
+        System.out.println("Notes successfully cleared");
+
         HashMap<Integer, Note> strFetchedNotes = new HashMap<Integer, Note>();
         getReturnGet(strFetchedNotes);
     }
 
     private void processShakeRequest() {
         notes.shake();
+
+        System.out.println("Notes successfully shook");
+
         HashMap<Integer, Note> pinned = notes.getPin();
         getReturnGet(pinned);
     }
@@ -282,6 +281,8 @@ public class Request implements Runnable {
         try {
             id = Integer.parseInt(splitStr[1]);
             notes.getNote(id).pinValue();
+
+            System.out.println("Note successfully pinned");
 
             writeStatus();
         } catch (NumberFormatException | IOException e) {
@@ -295,6 +296,8 @@ public class Request implements Runnable {
         try {
             id = Integer.parseInt(splitStr[1]);
             notes.getNote(id).unpinValue();
+
+            System.out.println("Note successfully unpinned");
 
             writeStatus();
         } catch (NumberFormatException | IOException e) {
@@ -311,6 +314,8 @@ public class Request implements Runnable {
     private void processInvalidRequest() {
         statusCode = "ERROR";
         try {
+
+            System.out.println("An error was encountered");
             writeStatus();
         } catch (IOException e) {
             e.printStackTrace();

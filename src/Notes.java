@@ -2,8 +2,8 @@ import java.io.*;
 import java.util.*;
 
 public class Notes implements Serializable {
-    public int width;
-    private int height;
+    int width;
+    int height;
     ArrayList<String> colors = new ArrayList<String>();
     HashMap<Integer, Note> notes = new HashMap<Integer, Note>();
 
@@ -73,9 +73,11 @@ public class Notes implements Serializable {
     }
 
     public synchronized void shake() {
-        for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i + 1).getPinStatus().equals("Unpinned"))
-                notes.remove(i + 1);
+        if (notes.size() > 0) {
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i + 1).getPinStatus().equals("Unpinned"))
+                    notes.remove(i + 1);
+            }
         }
     }
 
